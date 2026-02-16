@@ -118,6 +118,12 @@ class ScreenDetector:
                             if not self.matcher.find_on_screen(cancel_path, region):
                                 continue  # False positive, skip this detection
 
+                            # Additional check: TP dialog shouldn't have omakase/training buttons
+                            # If we see omakase button, we're likely on main game screen, not TP dialog
+                            omakase_path = str(self.templates_dir / "omakase_button.png")
+                            if self.matcher.find_on_screen(omakase_path, region):
+                                continue  # Main game screen, not TP dialog
+
                         # Special validation for TP_RECOVERY_ITEMS to avoid false positives
                         if screen == GameScreen.TP_RECOVERY_ITEMS:
                             # Only accept if the 閉じる button is also present (unique to TP screen)
