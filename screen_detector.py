@@ -86,7 +86,7 @@ class ScreenDetector:
             GameScreen.POST_TRAINING_COMPLETE,  # 完了する button (post-training)
             GameScreen.TRAINING_COMPLETE,    # 育成完了 button (training end)
             # GameScreen.MY_RULER_CONFIRM,     # 決定/キャンセル dialog - DISABLED (unreliable)
-            GameScreen.TP_RECOVERY_CONFIRM,  # TP recovery dialog - check before RACE_COMPLETION
+            # GameScreen.TP_RECOVERY_CONFIRM,  # DISABLED - too many false positives (matches menu buttons)
             GameScreen.TP_RECOVERY_ITEMS,    # TP items screen - check before RACE_COMPLETION (has 閉じる button)
             GameScreen.ITEM_QUANTITY,        # Item quantity dialog
             GameScreen.RACE_COMPLETION,      # 閉じる dialog - moved after TP recovery screens
@@ -112,17 +112,29 @@ class ScreenDetector:
                     if self.matcher.find_on_screen(template_path, region):
                         # Special validation for TP_RECOVERY_CONFIRM to avoid false positives
                         if screen == GameScreen.TP_RECOVERY_CONFIRM:
-                            # TP recovery dialog should have BOTH 回復する AND キャンセル buttons
-                            # Main game screen won't have both these buttons together
+                            # STRICT VALIDATION: TP recovery is a small popup dialog
+                            # It appears ONLY during training, not on menus
+
+                            # Must have cancel button
                             cancel_path = str(self.templates_dir / "cancel_button.png")
                             if not self.matcher.find_on_screen(cancel_path, region):
-                                continue  # False positive, skip this detection
+                                continue  # No cancel = not TP dialog
 
-                            # Additional check: TP dialog shouldn't have omakase/training buttons
-                            # If we see omakase button, we're likely on main game screen, not TP dialog
+                            # Must NOT have any menu buttons (menu screen has many buttons)
+                            # Check for home button
+                            home_button_path = str(self.templates_dir / "home_育成_button.png")
+                            if self.matcher.find_on_screen(home_button_path, region):
+                                continue  # Menu screen, not TP dialog
+
+                            # Must NOT have omakase button (main game)
                             omakase_path = str(self.templates_dir / "omakase_button.png")
                             if self.matcher.find_on_screen(omakase_path, region):
-                                continue  # Main game screen, not TP dialog
+                                continue  # Main game, not TP dialog
+
+                            # Must NOT have training buttons (prep screen)
+                            training_start_path = str(self.templates_dir / "training_育成開始_button.png")
+                            if self.matcher.find_on_screen(training_start_path, region):
+                                continue  # Prep screen, not TP dialog
 
                         # Special validation for TP_RECOVERY_ITEMS to avoid false positives
                         if screen == GameScreen.TP_RECOVERY_ITEMS:
