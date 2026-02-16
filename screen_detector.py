@@ -110,6 +110,14 @@ class ScreenDetector:
                 for template in self.screen_templates[screen]:
                     template_path = str(self.templates_dir / template)
                     if self.matcher.find_on_screen(template_path, region):
+                        # Special validation for TP_RECOVERY_CONFIRM to avoid false positives
+                        if screen == GameScreen.TP_RECOVERY_CONFIRM:
+                            # TP recovery dialog should have BOTH 回復する AND キャンセル buttons
+                            # Main game screen won't have both these buttons together
+                            cancel_path = str(self.templates_dir / "cancel_button.png")
+                            if not self.matcher.find_on_screen(cancel_path, region):
+                                continue  # False positive, skip this detection
+
                         # Special validation for TP_RECOVERY_ITEMS to avoid false positives
                         if screen == GameScreen.TP_RECOVERY_ITEMS:
                             # Only accept if the 閉じる button is also present (unique to TP screen)

@@ -16,7 +16,6 @@ test_screenshot.png
 play_area_*.png
 
 # Templates (generated)
-templates/
 
 # IDE
 .vscode/

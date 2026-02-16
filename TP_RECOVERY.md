@@ -1,5 +1,19 @@
 # TP Recovery Automation
 
+## Configuration
+
+**NEW:** You can now control whether the automation uses TP bottles automatically:
+
+```yaml
+# config.yaml
+auto_recover_tp: false  # Set to true to enable automatic TP recovery
+```
+
+- **When `false` (default):** The automation will click cancel/skip when TP recovery prompts appear
+- **When `true`:** The automation will automatically use the bottle to recover TP
+
+This prevents infinite loops when TP recovery dialogs appear but you don't want to use items.
+
 ## How It Works
 
 The TP recovery automation is **conditional** - it only activates when the game prompts you to recover TP.

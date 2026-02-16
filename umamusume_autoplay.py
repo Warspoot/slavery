@@ -79,11 +79,13 @@ class UmamusumeAutoplay:
         # TP recovery position offsets (configurable per screen)
         self.tp_recovery_row_y = self.config.get("tp_recovery_second_row_y", 195)
         self.tp_recovery_button_x = self.config.get("tp_recovery_button_x", 350)
+        self.auto_recover_tp = self.config.get("auto_recover_tp", False)
 
         print("Umamusume Autoplay initialized")
         print(f"Confidence threshold: {confidence}")
         print(f"Action delay: {action_delay}s")
         print(f"Debug mode: {self.debug}")
+        print(f"Auto TP recovery: {self.auto_recover_tp}")
 
     def _load_config(self, config_path: str) -> Dict[str, Any]:
         """Load configuration from YAML file."""
@@ -201,7 +203,8 @@ class UmamusumeAutoplay:
     def handle_tp_recovery_confirm(self) -> bool:
         """
         Handle the TP recovery confirmation dialog.
-        Clicks the 回復する (recover) button.
+        Clicks the 回復する (recover) button if auto_recover_tp is enabled.
+        Otherwise, clicks cancel to skip TP recovery.
 
         Returns:
             True if handled successfully
@@ -209,6 +212,18 @@ class UmamusumeAutoplay:
         print("Handling TP recovery confirmation...")
         self._debug_screenshot("tp_confirm")
 
+        if not self.auto_recover_tp:
+            print("⚠️  Auto TP recovery DISABLED - clicking cancel to skip")
+            print("   (Set auto_recover_tp: true in config.yaml to enable)")
+            # Click cancel button instead
+            return self.clicker.click_button_with_retry(
+                "cancel_button.png",
+                max_retries=self.max_retries,
+                retry_delay=self.retry_delay,
+                region=self.search_region
+            )
+
+        print("✓ Auto TP recovery ENABLED - clicking 回復する")
         return self.clicker.click_button_with_retry(
             "kaifuku_button.png",
             max_retries=self.max_retries,
@@ -589,14 +604,22 @@ class UmamusumeAutoplay:
                     self.handle_my_ruler_confirm()
                     action_taken = True
                 elif current_screen == GameScreen.TP_RECOVERY_CONFIRM:
-                    self.handle_tp_recovery_confirm()
+                    self.handle_tp_recovery_confirm()  # Will click cancel if auto_recover_tp is False
                     action_taken = True
                 elif current_screen == GameScreen.TP_RECOVERY_ITEMS:
-                    self.handle_tp_recovery_items()
-                    action_taken = True
+                    if self.auto_recover_tp:
+                        self.handle_tp_recovery_items()
+                        action_taken = True
+                    else:
+                        print("⚠️  Skipping TP recovery items (auto_recover_tp is False)")
+                        time.sleep(0.5)
                 elif current_screen == GameScreen.ITEM_QUANTITY:
-                    self.handle_item_quantity()
-                    action_taken = True
+                    if self.auto_recover_tp:
+                        self.handle_item_quantity()
+                        action_taken = True
+                    else:
+                        print("⚠️  Skipping item quantity (auto_recover_tp is False)")
+                        time.sleep(0.5)
                 elif current_screen == GameScreen.EVENT_SKIP_SETTINGS:
                     self.handle_event_skip_settings()
                     action_taken = True

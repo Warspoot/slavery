@@ -136,6 +136,9 @@ debug: false
 # Screen region to search (null for full screen)
 # Format: [x, y, width, height]
 search_region: null
+
+# TP Recovery settings
+auto_recover_tp: false  # Set to true to automatically use TP bottle when prompted
 ```
 
 ### Key Settings
@@ -145,6 +148,7 @@ search_region: null
 - **max_retries**: How many times to retry finding a button before giving up
 - **debug**: Set to `true` to save debug screenshots
 - **search_region**: Limit searching to a specific screen area (useful if running in a window)
+- **auto_recover_tp**: Set to `true` to automatically use TP bottles when prompted. When `false`, the automation will click cancel/skip TP recovery dialogs (default: `false`)
 
 ## Usage
 
