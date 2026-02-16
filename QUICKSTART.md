@@ -1,8 +1,38 @@
 # Quick Start Guide
 
+## Prerequisites (IMPORTANT!)
+
+### ⚠️ Required: X11 Session
+This tool **only works on X11**, not Wayland. PyAutoGUI cannot take screenshots on Wayland.
+
+**Check your session type:**
+```bash
+echo $XDG_SESSION_TYPE  # Must output: x11
+```
+
+**If you're on Wayland, switch to X11:**
+1. Log out
+2. At login screen, look for session selector (usually bottom-left)
+3. Select "Plasma (X11)"
+4. Log in
+
+### ⚠️ Required: Install scrot
+```bash
+sudo pacman -S scrot
+```
+
+Without `scrot`, screenshots will fail with "Failed to take screenshot" errors.
+
 ## Step-by-Step Setup
 
-### 1. Setup Virtual Environment
+### 1. Install System Dependencies
+
+```bash
+# Install scrot (REQUIRED for X11 screenshots on KDE Plasma)
+sudo pacman -S scrot
+```
+
+### 2. Setup Virtual Environment
 
 ```bash
 # Run the setup script
@@ -113,6 +143,27 @@ python umamusume_autoplay.py --continuous
 ```
 
 ## Troubleshooting Your First Run
+
+### "Failed to take screenshot" Error
+
+**This is the #1 most common error!**
+
+**Cause:** Missing `scrot` or running on Wayland
+
+**Solution:**
+```bash
+# 1. Install scrot
+sudo pacman -S scrot
+
+# 2. Verify you're on X11 (not Wayland)
+echo $XDG_SESSION_TYPE  # Should output: x11
+
+# 3. If on Wayland, log out and switch to X11 session at login screen
+
+# 4. Test screenshots work
+source venv/bin/activate
+python3 test_basic_screenshot.py
+```
 
 ### "Templates not found" error
 ```bash

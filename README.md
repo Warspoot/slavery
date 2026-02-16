@@ -25,12 +25,22 @@ Automates the process of starting autoplay for the Japanese version of Umamusume
 
 ## Requirements
 
+### System Requirements (Arch Linux / KDE Plasma)
+- **X11 session** (not Wayland - required for PyAutoGUI screenshots)
+- **scrot** - Screenshot utility for X11
+  ```bash
+  sudo pacman -S scrot
+  ```
+
+### Python Requirements
 - Python 3.8+
 - OpenCV
 - PyAutoGUI
 - PIL/Pillow
 - NumPy
 - PyYAML
+- python-xlib
+- pynput
 
 ## Installation
 
@@ -45,14 +55,32 @@ Run the setup script to create a virtual environment and install dependencies:
 Or manually:
 
 ```bash
-# Create virtual environment
+# 1. Install system dependencies (REQUIRED for screenshots)
+sudo pacman -S scrot
+
+# 2. Create virtual environment
 python3 -m venv venv
 
-# Activate virtual environment
+# 3. Activate virtual environment
 source venv/bin/activate
 
-# Install dependencies
+# 4. Install Python dependencies
 pip install -r requirements.txt
+```
+
+### Important: X11 vs Wayland
+
+This tool **requires X11** to function properly. PyAutoGUI cannot take screenshots on Wayland.
+
+**To switch to X11 on KDE Plasma:**
+1. Log out
+2. At the login screen, look for a session selector (usually bottom-left)
+3. Select "Plasma (X11)" instead of "Plasma (Wayland)"
+4. Log in
+
+**To verify you're on X11:**
+```bash
+echo $XDG_SESSION_TYPE  # Should output: x11
 ```
 
 ### Extract Templates
@@ -187,6 +215,37 @@ python umamusume_autoplay.py --sequence --config my_config.yaml
 ```
 
 ## Troubleshooting
+
+### "Failed to take screenshot" Error
+
+This is the most common error on Linux. The issue is usually missing dependencies or running on Wayland.
+
+**Solution:**
+1. **Install scrot** (required for X11 screenshots):
+   ```bash
+   sudo pacman -S scrot
+   ```
+
+2. **Verify you're on X11** (not Wayland):
+   ```bash
+   echo $XDG_SESSION_TYPE  # Should say "x11"
+   ```
+
+3. **Switch to X11 if needed:**
+   - Log out
+   - At login screen, select "Plasma (X11)"
+   - Log back in
+
+4. **Reinstall Python dependencies:**
+   ```bash
+   source venv/bin/activate
+   pip install --force-reinstall pillow pyautogui python-xlib
+   ```
+
+5. **Test screenshots:**
+   ```bash
+   python3 test_basic_screenshot.py
+   ```
 
 ### Buttons Not Being Found
 
