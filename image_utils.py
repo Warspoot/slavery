@@ -54,18 +54,22 @@ class ImageMatcher:
         self._screenshot_cache = None
         self._cache_region = None
 
-    def _get_screenshot(self, region: Optional[Tuple[int, int, int, int]] = None):
+    def _get_screenshot(self, region: Optional[Tuple[int, int, int, int]] = None, grayscale: bool = True):
         """
         Get screenshot with caching support.
 
         Args:
             region: Optional region to capture
+            grayscale: Whether to convert to grayscale
 
         Returns:
-            OpenCV format screenshot (BGR)
+            OpenCV format screenshot (BGR or GRAY)
         """
+        # Cache key includes both region and grayscale setting
+        cache_key = (region, grayscale)
+
         # Check if we can use cached screenshot
-        if self._screenshot_cache is not None and self._cache_region == region:
+        if self._screenshot_cache is not None and self._cache_region == cache_key:
             return self._screenshot_cache
 
         # Take new screenshot
@@ -73,9 +77,13 @@ class ImageMatcher:
         screenshot_np = np.array(screenshot)
         screenshot_cv = cv2.cvtColor(screenshot_np, cv2.COLOR_RGB2BGR)
 
+        # Convert to grayscale if requested
+        if grayscale:
+            screenshot_cv = cv2.cvtColor(screenshot_cv, cv2.COLOR_BGR2GRAY)
+
         # Cache it
         self._screenshot_cache = screenshot_cv
-        self._cache_region = region
+        self._cache_region = cache_key
 
         return screenshot_cv
 
@@ -86,33 +94,52 @@ class ImageMatcher:
         grayscale: bool = True
     ) -> Optional[Tuple[int, int, int, int]]:
         """
-        Find a template image on the screen.
+        Find a template image on the screen using multi-method matching.
 
         Args:
             template_path: Path to the template image
             region: Optional region to search (x, y, width, height)
-            grayscale: Whether to use grayscale matching
+            grayscale: Whether to use grayscale matching (default True for compatibility)
 
         Returns:
             Tuple of (x, y, width, height) if found, None otherwise
         """
         try:
-            # Get screenshot (cached if available)
-            screenshot_cv = self._get_screenshot(region)
+            # Get screenshot (always get color version for multi-method matching)
+            screenshot_cv = self._get_screenshot(region, grayscale=False)
 
             # Load template
             template = cv2.imread(template_path)
             if template is None:
                 raise ValueError(f"Could not load template: {template_path}")
 
-            # Convert to grayscale if needed
-            if grayscale:
-                screenshot_cv = cv2.cvtColor(screenshot_cv, cv2.COLOR_BGR2GRAY)
-                template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+            # Try multiple matching methods and take the best result
+            methods_results = []
 
-            # Perform template matching
-            result = cv2.matchTemplate(screenshot_cv, template, cv2.TM_CCOEFF_NORMED)
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+            # Method 1: Grayscale matching (good for brightness-independent matching)
+            screenshot_gray = cv2.cvtColor(screenshot_cv, cv2.COLOR_BGR2GRAY)
+            template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+            result_gray = cv2.matchTemplate(screenshot_gray, template_gray, cv2.TM_CCOEFF_NORMED)
+            _, max_val_gray, _, max_loc_gray = cv2.minMaxLoc(result_gray)
+            methods_results.append(('grayscale', max_val_gray, max_loc_gray))
+
+            # Method 2: Color matching (good for colored buttons)
+            result_color = cv2.matchTemplate(screenshot_cv, template, cv2.TM_CCOEFF_NORMED)
+            _, max_val_color, _, max_loc_color = cv2.minMaxLoc(result_color)
+            methods_results.append(('color', max_val_color, max_loc_color))
+
+            # Method 3: Edge detection matching (good for shape-based matching)
+            screenshot_edges = cv2.Canny(screenshot_gray, 50, 150)
+            template_edges = cv2.Canny(template_gray, 50, 150)
+            result_edges = cv2.matchTemplate(screenshot_edges, template_edges, cv2.TM_CCOEFF_NORMED)
+            _, max_val_edges, _, max_loc_edges = cv2.minMaxLoc(result_edges)
+            methods_results.append(('edges', max_val_edges, max_loc_edges))
+
+            # Use the best result from all methods
+            best_method, max_val, max_loc = max(methods_results, key=lambda x: x[1])
+
+            # For debugging: show which method worked
+            # print(f"  {template_path}: {best_method}={max_val:.3f}")
 
             # Check if confidence threshold is met
             if max_val >= self.confidence:

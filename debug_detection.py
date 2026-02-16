@@ -51,12 +51,15 @@ def main():
     print(f"✓ Saved screenshot to: debug_current_screen.png")
     print()
 
+    # Convert screenshot to grayscale for matching
+    screenshot_gray = cv2.cvtColor(screenshot_cv, cv2.COLOR_BGR2GRAY)
+
     # Test all templates
     templates_dir = Path("templates")
     all_templates = sorted(templates_dir.glob("*.png"))
 
     print("=" * 70)
-    print("TESTING ALL TEMPLATES")
+    print("TESTING ALL TEMPLATES (MULTI-METHOD MATCHING)")
     print("=" * 70)
     print()
 
@@ -70,9 +73,31 @@ def main():
         if template is None:
             continue
 
-        # Try to match
-        result = cv2.matchTemplate(screenshot_cv, template, cv2.TM_CCOEFF_NORMED)
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+        # Convert template to grayscale
+        template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+
+        # Try multiple matching methods
+        methods_results = []
+
+        # Method 1: Grayscale
+        result_gray = cv2.matchTemplate(screenshot_gray, template_gray, cv2.TM_CCOEFF_NORMED)
+        _, max_val_gray, _, max_loc_gray = cv2.minMaxLoc(result_gray)
+        methods_results.append(('gray', max_val_gray, max_loc_gray))
+
+        # Method 2: Color
+        result_color = cv2.matchTemplate(screenshot_cv, template, cv2.TM_CCOEFF_NORMED)
+        _, max_val_color, _, max_loc_color = cv2.minMaxLoc(result_color)
+        methods_results.append(('color', max_val_color, max_loc_color))
+
+        # Method 3: Edges
+        screenshot_edges = cv2.Canny(screenshot_gray, 50, 150)
+        template_edges = cv2.Canny(template_gray, 50, 150)
+        result_edges = cv2.matchTemplate(screenshot_edges, template_edges, cv2.TM_CCOEFF_NORMED)
+        _, max_val_edges, _, max_loc_edges = cv2.minMaxLoc(result_edges)
+        methods_results.append(('edges', max_val_edges, max_loc_edges))
+
+        # Use best result
+        best_method, max_val, max_loc = max(methods_results, key=lambda x: x[1])
 
         # Check if it matches
         matched = max_val >= confidence
@@ -81,7 +106,9 @@ def main():
         color = "\033[92m" if matched else "\033[91m"
         reset = "\033[0m"
 
-        print(f"{color}{status}{reset} {template_name:40s} confidence: {max_val:.3f}")
+        # Show which method worked best and all scores
+        method_scores = f"[G:{max_val_gray:.2f} C:{max_val_color:.2f} E:{max_val_edges:.2f}]"
+        print(f"{color}{status}{reset} {template_name:40s} best: {best_method:5s} {max_val:.3f} {method_scores}")
 
         if matched:
             matches.append({
