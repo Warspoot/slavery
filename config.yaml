@@ -15,4 +15,4 @@ tp_recovery_button_x: 586
 tp_recovery_second_row_y: 231
 unknown_screen_delay: 0.3
 # TP Recovery settings
-auto_recover_tp: false  # Set to true to automatically use TP bottle when prompted
+auto_recover_tp: true  # Set to true to automatically use TP bottle when prompted
