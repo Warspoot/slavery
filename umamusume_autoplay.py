@@ -121,12 +121,9 @@ class UmamusumeAutoplay:
         print("Handling home screen...")
         self._debug_screenshot("home_screen")
 
-        return self.clicker.click_button_with_retry(
-            "home_育成_button.png",
-            max_retries=self.max_retries,
-            retry_delay=self.retry_delay,
-            region=self.search_region
-        )
+        # TODO: Add home screen template
+        print("⚠️  Home screen detection not yet implemented with new templates")
+        return False
 
     def handle_support_card_selection(self) -> bool:
         """
@@ -139,12 +136,9 @@ class UmamusumeAutoplay:
         print("Handling support card selection...")
         self._debug_screenshot("support_cards")
 
-        return self.clicker.click_button_with_retry(
-            "support_決定_button.png",
-            max_retries=self.max_retries,
-            retry_delay=self.retry_delay,
-            region=self.search_region
-        )
+        # TODO: Add support card selection template
+        print("⚠️  Support card selection not yet implemented with new templates")
+        return False
 
     def handle_training_prep(self) -> bool:
         """
@@ -157,12 +151,23 @@ class UmamusumeAutoplay:
         print("Handling training preparation...")
         self._debug_screenshot("training_prep")
 
-        return self.clicker.click_button_with_retry(
+        # Try multiple button templates (button appears in different forms)
+        button_templates = [
             "training_育成開始_button.png",
-            max_retries=self.max_retries,
-            retry_delay=self.retry_delay,
-            region=self.search_region
-        )
+            "training_start_button_small.png",
+        ]
+
+        for template in button_templates:
+            if self.clicker.click_button_with_retry(
+                template,
+                max_retries=self.max_retries,
+                retry_delay=self.retry_delay,
+                region=self.search_region
+            ):
+                return True
+
+        print("⚠️  Could not find any training start button")
+        return False
 
     def handle_event_banner(self) -> bool:
         """
@@ -175,12 +180,9 @@ class UmamusumeAutoplay:
         print("Handling event banner...")
         self._debug_screenshot("event_banner")
 
-        return self.clicker.click_button_with_retry(
-            "event_banner_close.png",
-            max_retries=self.max_retries,
-            retry_delay=self.retry_delay,
-            region=self.search_region
-        )
+        # TODO: Add event banner close template
+        print("⚠️  Event banner close not yet implemented with new templates")
+        return False
 
     def handle_my_ruler_confirm(self) -> bool:
         """
@@ -194,7 +196,7 @@ class UmamusumeAutoplay:
         self._debug_screenshot("my_ruler")
 
         return self.clicker.click_button_with_retry(
-            "ketteyi_button.png",
+            "kettei_button.png",
             max_retries=self.max_retries,
             retry_delay=self.retry_delay,
             region=self.search_region
@@ -217,7 +219,8 @@ class UmamusumeAutoplay:
             print("   (Set auto_recover_tp: true in config.yaml to enable)")
             # Click cancel button instead
             return self.clicker.click_button_with_retry(
-                "cancel_button.png",
+                # TODO: Add cancel button template
+                # "cancel_button.png",
                 max_retries=self.max_retries,
                 retry_delay=self.retry_delay,
                 region=self.search_region
@@ -278,7 +281,8 @@ class UmamusumeAutoplay:
         self._debug_screenshot("item_quantity")
 
         return self.clicker.click_button_with_retry(
-            "ok_button.png",
+            # TODO: Add OK button template
+            # "ok_button.png",
             max_retries=self.max_retries,
             retry_delay=self.retry_delay,
             region=self.search_region
@@ -297,7 +301,8 @@ class UmamusumeAutoplay:
 
         # Click on "すべてのイベントを短縮" (skip all events)
         if self.clicker.click_button_with_retry(
-            "skip_all_events.png",
+            # TODO: Add skip all events template
+            # "skip_all_events.png",
             max_retries=self.max_retries,
             retry_delay=self.retry_delay,
             region=self.search_region
@@ -305,7 +310,7 @@ class UmamusumeAutoplay:
             # Wait a bit and then click the 決定 button
             time.sleep(0.5)
             return self.clicker.click_button_with_retry(
-                "ketteyi_button.png",
+                "kettei_button.png",
                 max_retries=self.max_retries,
                 retry_delay=self.retry_delay,
                 region=self.search_region
@@ -433,12 +438,23 @@ class UmamusumeAutoplay:
         print("Handling post-training next...")
         self._debug_screenshot("post_training_next")
 
-        return self.clicker.click_button_with_retry(
+        # Try multiple button templates (button appears in different forms)
+        button_templates = [
             "tsugi_e_button.png",
-            max_retries=self.max_retries,
-            retry_delay=self.retry_delay,
-            region=self.search_region
-        )
+            "tsugi_e_corner.png",
+        ]
+
+        for template in button_templates:
+            if self.clicker.click_button_with_retry(
+                template,
+                max_retries=self.max_retries,
+                retry_delay=self.retry_delay,
+                region=self.search_region
+            ):
+                return True
+
+        print("⚠️  Could not find any 次へ button")
+        return False
 
     def run_automation_sequence(self) -> bool:
         """
@@ -565,7 +581,12 @@ class UmamusumeAutoplay:
                 action_taken = False
                 print(f"\n[{current_screen.value}] detected")
 
-                if current_screen == GameScreen.POST_TRAINING_NEXT:
+                if current_screen == GameScreen.AUTO_PLAY_IN_PROGRESS:
+                    # Auto-play is active - wait until it finishes
+                    print("⏸️  Auto-play in progress - waiting...")
+                    time.sleep(1.0)  # Wait 1 second before checking again
+                    action_taken = True  # Mark as action taken to avoid unknown screen delay
+                elif current_screen == GameScreen.POST_TRAINING_NEXT:
                     # Post-training flow - 次へ button
                     self.handle_post_training_next()
                     action_taken = True

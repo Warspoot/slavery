@@ -15,6 +15,9 @@ debug_*.png
 test_screenshot.png
 play_area_*.png
 
+# Scrot temporary files (created by screenshot utility)
+.screenshot*.png
+
 # Templates (generated)
 
 # IDE
