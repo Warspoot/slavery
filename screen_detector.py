@@ -120,32 +120,6 @@ class ScreenDetector:
                 for template in self.screen_templates[screen]:
                     template_path = str(self.templates_dir / template)
                     if self.matcher.find_on_screen(template_path, region):
-                        # Special validation for TP_RECOVERY_CONFIRM to avoid false positives
-                        if screen == GameScreen.TP_RECOVERY_CONFIRM:
-                            # STRICT VALIDATION: TP recovery is a small popup dialog
-                            # It appears ONLY during training, not on menus
-
-                            # Must have cancel button
-                            cancel_path = str(self.templates_dir / "cancel_button.png")
-                            if not self.matcher.find_on_screen(cancel_path, region):
-                                continue  # No cancel = not TP dialog
-
-                            # Must NOT have any menu buttons (menu screen has many buttons)
-                            # Check for home button
-                            home_button_path = str(self.templates_dir / "home_育成_button.png")
-                            if self.matcher.find_on_screen(home_button_path, region):
-                                continue  # Menu screen, not TP dialog
-
-                            # Must NOT have omakase button (main game)
-                            omakase_path = str(self.templates_dir / "omakase_button.png")
-                            if self.matcher.find_on_screen(omakase_path, region):
-                                continue  # Main game, not TP dialog
-
-                            # Must NOT have training buttons (prep screen)
-                            training_start_path = str(self.templates_dir / "training_育成開始_button.png")
-                            if self.matcher.find_on_screen(training_start_path, region):
-                                continue  # Prep screen, not TP dialog
-
                         # Special validation for TP_RECOVERY_ITEMS to avoid false positives
                         if screen == GameScreen.TP_RECOVERY_ITEMS:
                             # Only accept if the 閉じる button is also present (unique to TP screen)
