@@ -1,5 +1,4 @@
 action_delay: 0.3
-auto_recover_tp: true
 confidence_threshold: 0.7
 cooldown_time: 1.5
 debug: false
@@ -8,10 +7,12 @@ retry_delay: 1.0
 screen_change_delay: 0.8
 screenshot_delay: 0.3
 search_region:
-- 2871
-- 742
-- 691
-- 1278
-tp_recovery_button_x: 580
-tp_recovery_second_row_y: 341
+- 2494
+- 1027
+- 1475
+- 867
+tp_recovery_button_x: 586
+tp_recovery_second_row_y: 231
 unknown_screen_delay: 0.3
+# TP Recovery settings
+auto_recover_tp: true  # Set to true to automatically use TP bottle when prompted
