@@ -151,9 +151,7 @@ class UmamusumeAutoplay:
         print("Handling training preparation...")
         self._debug_screenshot("training_prep")
 
-        # Try multiple button templates (button appears in different forms)
         button_templates = [
-            "training_育成開始_button.png",
             "training_start_button_small.png",
         ]
 
@@ -355,6 +353,24 @@ class UmamusumeAutoplay:
             region=self.search_region
         )
 
+    def handle_race_retry(self) -> bool:
+        """
+        Handle the race retry prompt.
+        Clicks the もう一度 (try again) button.
+
+        Returns:
+            True if handled successfully
+        """
+        print("Handling race retry...")
+        self._debug_screenshot("race_retry")
+
+        return self.clicker.click_button_with_retry(
+            "mouichido_button.png",
+            max_retries=self.max_retries,
+            retry_delay=self.retry_delay,
+            region=self.search_region
+        )
+
     def handle_race_completion(self) -> bool:
         """
         Handle the race completion dialog.
@@ -438,9 +454,7 @@ class UmamusumeAutoplay:
         print("Handling post-training next...")
         self._debug_screenshot("post_training_next")
 
-        # Try multiple button templates (button appears in different forms)
         button_templates = [
-            "tsugi_e_button.png",
             "tsugi_e_corner.png",
         ]
 
@@ -602,8 +616,12 @@ class UmamusumeAutoplay:
                     # Training complete - 育成完了 button
                     self.handle_training_complete()
                     action_taken = True
+                elif current_screen == GameScreen.RACE_RETRY:
+                    # Race retry - もう一度 button (takes priority over 閉じる)
+                    self.handle_race_retry()
+                    action_taken = True
                 elif current_screen == GameScreen.RACE_COMPLETION:
-                    # Prioritize race completion (閉じる button)
+                    # Race completion - 閉じる button
                     self.handle_race_completion()
                     action_taken = True
                 elif current_screen == GameScreen.FAST_FORWARD_BUTTON:

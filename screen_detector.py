@@ -21,6 +21,7 @@ class GameScreen(Enum):
     EVENT_SKIP_SETTINGS = "event_skip_settings"
     FAST_FORWARD_BUTTON = "fast_forward_button"
     OMAKASE_MENU = "omakase_menu"
+    RACE_RETRY = "race_retry"
     RACE_COMPLETION = "race_completion"
     TRAINING_COMPLETE = "training_complete"
     POST_TRAINING_COMPLETE = "post_training_complete"
@@ -48,7 +49,7 @@ class ScreenDetector:
             GameScreen.AUTO_PLAY_IN_PROGRESS: ["auto_play_inprogress.png"],  # Must check FIRST - blocks all input
             GameScreen.HOME_SCREEN: [],  # TODO: Add home screen templates
             GameScreen.SUPPORT_CARD_SELECTION: [],  # TODO: Add support card selection templates
-            GameScreen.TRAINING_PREP: ["training_育成開始_button.png", "training_start_banner.png"],
+            GameScreen.TRAINING_PREP: ["training_start_banner.png"],
             GameScreen.EVENT_BANNER: [],  # TODO: Add event banner templates
             GameScreen.MY_RULER_CONFIRM: ["kettei_button.png"],
             GameScreen.TP_RECOVERY_CONFIRM: ["kaifuku_button.png"],  # TP recovery confirmation dialog
@@ -57,11 +58,12 @@ class ScreenDetector:
             GameScreen.EVENT_SKIP_SETTINGS: [],  # TODO: Add event skip templates
             GameScreen.FAST_FORWARD_BUTTON: ["fast_forward.png"],
             GameScreen.OMAKASE_MENU: ["omakase_button.png"],
+            GameScreen.RACE_RETRY: ["mouichido_button.png"],
             GameScreen.RACE_COMPLETION: ["tojiru_button.png"],
             GameScreen.TRAINING_COMPLETE: ["training_complete_button.png"],
             GameScreen.POST_TRAINING_COMPLETE: ["kanryou_suru_button.png"],
             GameScreen.FACTOR_CONFIRM: ["inshi_kakutei_button.png"],
-            GameScreen.POST_TRAINING_NEXT: ["tsugi_e_button.png", "tsugi_e_corner.png"],
+            GameScreen.POST_TRAINING_NEXT: ["tsugi_e_corner.png"],
         }
 
     def detect_current_screen(
@@ -97,6 +99,7 @@ class ScreenDetector:
             GameScreen.TP_RECOVERY_CONFIRM,  # TP recovery confirmation dialog (回復する button)
             GameScreen.TP_RECOVERY_ITEMS,    # TP items screen - check before RACE_COMPLETION (has 閉じる button)
             GameScreen.ITEM_QUANTITY,        # Item quantity dialog
+            GameScreen.RACE_RETRY,           # もう一度 button - check BEFORE 閉じる
             GameScreen.RACE_COMPLETION,      # 閉じる dialog - moved after TP recovery screens
             GameScreen.EVENT_SKIP_SETTINGS,  # Event skip settings
             GameScreen.OMAKASE_MENU,         # Omakase menu - checked AFTER training prep
