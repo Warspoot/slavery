@@ -94,9 +94,9 @@ class ScreenDetector:
             GameScreen.FACTOR_CONFIRM,       # 因子確定 button
             GameScreen.POST_TRAINING_COMPLETE,  # 完了する button (post-training)
             GameScreen.TRAINING_COMPLETE,    # 育成完了 button (training end)
+            GameScreen.TP_RECOVERY_CONFIRM,  # TP recovery confirmation dialog (回復する button) - CHECK BEFORE TRAINING PREP
             GameScreen.TRAINING_PREP,        # 育成開始 button - CHECK BEFORE OMAKASE (both visible at same time)
             # GameScreen.MY_RULER_CONFIRM,     # 決定/キャンセル dialog - DISABLED (unreliable)
-            GameScreen.TP_RECOVERY_CONFIRM,  # TP recovery confirmation dialog (回復する button)
             GameScreen.TP_RECOVERY_ITEMS,    # TP items screen - check before RACE_COMPLETION (has 閉じる button)
             GameScreen.ITEM_QUANTITY,        # Item quantity dialog
             GameScreen.RACE_RETRY,           # もう一度 button - check BEFORE 閉じる
