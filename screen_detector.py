@@ -21,10 +21,12 @@ class GameScreen(Enum):
     EVENT_SKIP_SETTINGS = "event_skip_settings"
     FAST_FORWARD_BUTTON = "fast_forward_button"
     OMAKASE_MENU = "omakase_menu"
+    OMAKASE_CONFIRM = "omakase_confirm"
     RACE_RETRY = "race_retry"
     RACE_COMPLETION = "race_completion"
     TRAINING_COMPLETE = "training_complete"
     POST_TRAINING_COMPLETE = "post_training_complete"
+    KAKUTEI_CONFIRM = "kakutei_confirm"
     FACTOR_CONFIRM = "factor_confirm"
     POST_TRAINING_NEXT = "post_training_next"
     UNKNOWN = "unknown"
@@ -49,7 +51,7 @@ class ScreenDetector:
             GameScreen.AUTO_PLAY_IN_PROGRESS: ["auto_play_inprogress.png"],  # Must check FIRST - blocks all input
             GameScreen.HOME_SCREEN: [],  # TODO: Add home screen templates
             GameScreen.SUPPORT_CARD_SELECTION: [],  # TODO: Add support card selection templates
-            GameScreen.TRAINING_PREP: ["training_start_banner.png"],
+            GameScreen.TRAINING_PREP: ["training_start_button_small.png", "training_start_banner.png"],
             GameScreen.EVENT_BANNER: [],  # TODO: Add event banner templates
             GameScreen.MY_RULER_CONFIRM: ["kettei_button.png"],
             GameScreen.TP_RECOVERY_CONFIRM: ["kaifuku_button.png"],  # TP recovery confirmation dialog
@@ -58,10 +60,12 @@ class ScreenDetector:
             GameScreen.EVENT_SKIP_SETTINGS: [],  # TODO: Add event skip templates
             GameScreen.FAST_FORWARD_BUTTON: ["fast_forward.png"],
             GameScreen.OMAKASE_MENU: ["omakase_button.png"],
+            GameScreen.OMAKASE_CONFIRM: ["kaishi_button.png"],
             GameScreen.RACE_RETRY: ["mouichido_button.png"],
             GameScreen.RACE_COMPLETION: ["tojiru_button.png"],
             GameScreen.TRAINING_COMPLETE: ["training_complete_button.png"],
-            GameScreen.POST_TRAINING_COMPLETE: ["kanryou_suru_button.png"],
+            GameScreen.POST_TRAINING_COMPLETE: ["kanryou_suru_button.png", "kanryou_button_banner.png"],
+            GameScreen.KAKUTEI_CONFIRM: ["kakutei_button.png"],
             GameScreen.FACTOR_CONFIRM: ["inshi_kakutei_button.png"],
             GameScreen.POST_TRAINING_NEXT: ["tsugi_e_corner.png"],
         }
@@ -102,6 +106,7 @@ class ScreenDetector:
             GameScreen.RACE_RETRY,           # もう一度 button - check BEFORE 閉じる
             GameScreen.RACE_COMPLETION,      # 閉じる dialog - moved after TP recovery screens
             GameScreen.EVENT_SKIP_SETTINGS,  # Event skip settings
+            GameScreen.OMAKASE_CONFIRM,      # 開始 button inside omakase menu - check BEFORE omakase button
             GameScreen.OMAKASE_MENU,         # Omakase menu - checked AFTER training prep
             GameScreen.EVENT_BANNER,         # Event banner popup
             GameScreen.FAST_FORWARD_BUTTON,  # Fast forward during race
@@ -120,12 +125,6 @@ class ScreenDetector:
                 for template in self.screen_templates[screen]:
                     template_path = str(self.templates_dir / template)
                     if self.matcher.find_on_screen(template_path, region):
-                        # Special validation for TP_RECOVERY_ITEMS to avoid false positives
-                        if screen == GameScreen.TP_RECOVERY_ITEMS:
-                            # Only accept if the 閉じる button is also present (unique to TP screen)
-                            tojiru_path = str(self.templates_dir / "tojiru_button.png")
-                            if not self.matcher.find_on_screen(tojiru_path, region):
-                                continue  # False positive, skip this detection
                         return screen
 
         # Then check background screens

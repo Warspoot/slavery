@@ -353,6 +353,24 @@ class UmamusumeAutoplay:
             region=self.search_region
         )
 
+    def handle_omakase_confirm(self) -> bool:
+        """
+        Handle the omakase confirmation menu.
+        Clicks the 開始 (start) button inside the omakase menu.
+
+        Returns:
+            True if handled successfully
+        """
+        print("Handling omakase confirm...")
+        self._debug_screenshot("omakase_confirm")
+
+        return self.clicker.click_button_with_retry(
+            "kaishi_button.png",
+            max_retries=self.max_retries,
+            retry_delay=self.retry_delay,
+            region=self.search_region
+        )
+
     def handle_race_retry(self) -> bool:
         """
         Handle the race retry prompt.
@@ -420,6 +438,24 @@ class UmamusumeAutoplay:
 
         return self.clicker.click_button_with_retry(
             "kanryou_suru_button.png",
+            max_retries=self.max_retries,
+            retry_delay=self.retry_delay,
+            region=self.search_region
+        )
+
+    def handle_kakutei_confirm(self) -> bool:
+        """
+        Handle the 確定 confirmation button.
+        Clicks the 確定 button.
+
+        Returns:
+            True if handled successfully
+        """
+        print("Handling kakutei confirm...")
+        self._debug_screenshot("kakutei_confirm")
+
+        return self.clicker.click_button_with_retry(
+            "kakutei_button.png",
             max_retries=self.max_retries,
             retry_delay=self.retry_delay,
             region=self.search_region
@@ -595,7 +631,11 @@ class UmamusumeAutoplay:
                 action_taken = False
                 print(f"\n[{current_screen.value}] detected")
 
-                if current_screen == GameScreen.AUTO_PLAY_IN_PROGRESS:
+                if current_screen == GameScreen.KAKUTEI_CONFIRM:
+                    # 確定 button - takes priority over auto-play detection
+                    self.handle_kakutei_confirm()
+                    action_taken = True
+                elif current_screen == GameScreen.AUTO_PLAY_IN_PROGRESS:
                     # Auto-play is active - wait until it finishes
                     print("⏸️  Auto-play in progress - waiting...")
                     time.sleep(1.0)  # Wait 1 second before checking again
@@ -661,6 +701,9 @@ class UmamusumeAutoplay:
                         time.sleep(0.5)
                 elif current_screen == GameScreen.EVENT_SKIP_SETTINGS:
                     self.handle_event_skip_settings()
+                    action_taken = True
+                elif current_screen == GameScreen.OMAKASE_CONFIRM:
+                    self.handle_omakase_confirm()
                     action_taken = True
                 elif current_screen == GameScreen.OMAKASE_MENU:
                     self.handle_omakase_menu()
